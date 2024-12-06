@@ -11,5 +11,8 @@
     "react": "latest",
     "react-dom": "latest",
     "@google/generative-ai": "^0.21.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
-}
+}]
