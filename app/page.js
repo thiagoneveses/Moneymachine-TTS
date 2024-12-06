@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import VoiceSelector from '@/components/VoiceSelector';
-import LanguageSelector from '@/components/LanguageSelector';
-import FileDropzone from '@/components/FileDropzone';
 import { processFile } from '@/lib/api';
+import { VoiceSelector } from '../components/VoiceSelector';
+import { FileDropzone } from '../components/FileDropzone';
+import { processFile } from '../lib/api';
 
 export default function Home() {
   const [sourceLanguage, setSourceLanguage] = useState('pt-BR');
