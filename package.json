@@ -1,0 +1,79 @@
+// package.json
+{
+  "name": "TTS-Translator-Moneymachine",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thiagoneveses/Moneymachine-TTS.git"
+  },
+  "build": {
+    "publish": [{
+      "provider": "github",
+      "owner": "thiagoneveses",
+      "repo": "Moneymachine-TTS"
+    }],
+    // ... resto das configurações build
+  }
+}
+
+// main.js
+const { app, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
+
+function setupAutoUpdate() {
+  // Log de updates
+  autoUpdater.logger = require('electron-log');
+  autoUpdater.logger.transports.file.level = 'debug';
+
+  // Configurações
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'seu-usuario',
+    repo: 'seu-repositorio',
+    private: false,
+  });
+
+  // Eventos
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Verificando updates...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Atualização Disponível',
+      message: `Nova versão ${info.version} disponível. Baixar agora?`,
+      buttons: ['Sim', 'Não']
+    }).then(result => {
+      if (result.response === 0) autoUpdater.downloadUpdate();
+    });
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Atualização Pronta',
+      message: 'Reiniciar para instalar?',
+      buttons: ['Reiniciar', 'Depois']
+    }).then(result => {
+      if (result.response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+
+  // Checar updates a cada hora
+  setInterval(() => {
+    autoUpdater.checkForUpdates().catch(err => {
+      console.log('Erro ao verificar updates:', err);
+    });
+  }, 60 * 60 * 1000);
+}
+
+app.whenReady().then(() => {
+  createWindow();
+  setupAutoUpdate();
+  autoUpdater.checkForUpdates();
+});
+
+Copy{
+  "version": "0.1.0"
+}

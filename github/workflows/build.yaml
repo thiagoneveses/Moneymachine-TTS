@@ -1,0 +1,60 @@
+# .github/workflows/build.yml
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install -g electron-builder
+
+      # Necessário para builds Mac
+      - name: Prepare for app notarization
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.API_KEY_BASE64 }}' > ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8.b64
+          base64 --decode ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8.b64 > ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8
+
+      # Build Mac
+      - name: Build Mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run build:mac
+          
+      # Upload artifacts
+      - name: Upload Mac Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-build
+          path: |
+            release/*.dmg
+            release/mac/*.zip
+            
+      # Criar release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            release/*.dmg
+            release/mac/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
