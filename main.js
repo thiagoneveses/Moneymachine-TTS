@@ -136,16 +136,6 @@ async function processTextToSpeech(text, voice, outputPath) {
 ipcMain.handle('process-file', async (event, data) => {
     const { content, fileName, sourceLanguage, sourceVoice, translations } = data;
     
-    // Perguntar se quer salvar o texto traduzido
-    const saveTextChoice = await dialog.showMessageBox(mainWindow, {
-        type: 'question',
-        buttons: ['Sim', 'Não'],
-        title: 'Salvar Texto',
-        message: 'Deseja salvar os textos traduzidos em arquivos .txt?'
-    });
-    
-    const shouldSaveText = saveTextChoice.response === 0;
-    
     const outputDir = await dialog.showOpenDialog(mainWindow, {
         properties: ['openDirectory'],
         title: 'Select Output Directory'
@@ -194,12 +184,6 @@ ipcMain.handle('process-file', async (event, data) => {
                 if (i < textChunks.length - 1) {
                     await delay(1000);
                 }
-            }
-            
-            // Se escolheu salvar o texto, salva em arquivo .txt
-            if (shouldSaveText) {
-                const textOutputPath = path.join(outputDir.filePaths[0], `${baseName}_${trans.targetLang}.txt`);
-                await fs.writeFile(textOutputPath, fullTranslation.trim(), 'utf8');
             }
             
             // Gerar áudio da tradução
